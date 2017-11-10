@@ -10,8 +10,7 @@ const scraperClient = ScraperClient.getInstance();
 
 scraperClient.request({
 	url: 'nicodev.fr',
-	function: getLinks,
-	args: {}
+	function: getLinks
 })
 .then(function(result) {
 	console.log(result);

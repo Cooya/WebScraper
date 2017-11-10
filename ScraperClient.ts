@@ -168,14 +168,15 @@ export class ScraperClient {
 	public request(params) {
 		if(!params.url)
 			return Promise.reject('"url" parameter is required.');
-		if(!params.scriptPath && !params.function)
-			return Promise.reject('"scriptPath" or "function" parameter is required.');
+		if(!params.scriptPath) {
+			if(!params.function)
+				return Promise.reject('"scriptPath" or/and "function" parameters are required.');
+			else
+				params.function = params.function.toString();
+		}
 
 		if(!params.url.startsWith('http://') && !params.url.startsWith('https://'))
 			params.url = 'http://' + params.url;
-
-		if(params.function)
-			params.function = params.function.toString();
 
 		return new Promise(function(resolve, reject) {
 			this.requestsQueue.push({

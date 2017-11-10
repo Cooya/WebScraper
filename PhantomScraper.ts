@@ -44,7 +44,7 @@ class PhantomScraper {
 
 			let action;
 			if(req.scriptPath) { // evaluate a function in a file
-				action = req.method ? this.scripts[req.scriptPath][req.method] : this.scripts[req.scriptPath];
+				action = req.function ? this.scripts[req.scriptPath][req.function] : this.scripts[req.scriptPath];
 				req.args.evaluationType = 'file';
 			}
 			else { // evaluate a function in a string
@@ -97,7 +97,6 @@ class PhantomScraper {
 			'Connection': 'keep-alive',
 			'Pragma': 'no-cache',
 			'Cache-Control': 'no-cache'
-
 		};
 		page.viewportSize = {width: 1600, height: 900};
 		return page;
