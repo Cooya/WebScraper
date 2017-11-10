@@ -1,0 +1,35 @@
+{
+  "name": "@coya/web-scraper",
+  "version": "0.0.1",
+  "description": "Web scraper based on PhantomJS",
+  "main": "js/ScraperClient.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rm -rf js && tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cooya/WebScraper.git"
+  },
+  "keywords": [
+    "web",
+    "scraping",
+    "scraper",
+    "crawler",
+    "data",
+    "gathering"
+  ],
+  "author": "Coya",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Cooya/WebScraper/issues"
+  },
+  "homepage": "https://github.com/Cooya/WebScraper#readme",
+  "devDependencies": {
+    "@types/node": "^8.0.50",
+    "typescript": "^2.6.1"
+  },
+  "dependencies": {
+    "@coya/services": "^1.0.2"
+  }
+}

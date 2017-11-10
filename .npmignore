@@ -1,0 +1,6 @@
+.git/
+examples/
+resources/
+.gitignore
+tsconfig.json
+*.ts
