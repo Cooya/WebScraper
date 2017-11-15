@@ -1,12 +1,12 @@
 {
   "name": "@coya/web-scraper",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Web scraper based on PhantomJS",
   "main": "js/ScraperClient.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rm -rf js && tsc",
-	"example": "node examples/listLinks.js"
+    "example": "node examples/listLinks.js"
   },
   "repository": {
     "type": "git",
