@@ -59,3 +59,30 @@ module.exports = function() { // return all links from the requested page
     }).get();
 };
 ```
+
+## Methods
+
+### ScraperClient.getInstance()
+
+The ScraperClient object is a singleton, only one client can be created, so this method is required to get the client instance.
+
+### request(params)
+
+Send a request to a specific url and inject JavaScript into the page associated. Return a promise with the result in parameter.
+
+Parameter | Type    | Description | Default value
+--------  | ---     | --- | ---
+params  | object | see below for details about this | none
+
+### closeScraper()
+
+Terminate the PhantomJS web scraper process that will allow to end the current NodeJS script properly.
+
+### Request parameters spec
+
+Parameter | Type    | Description | Required
+--------  | ---     | --- | ---
+url  | string | target url | yes
+scriptPath | string | absolute path of the JS script to inject | optional
+function | string or function | if string, it will be the name of the function to call from the injected script, if function, it will be a function injected into the page | optional
+args | object | object passed to the called function | optional
