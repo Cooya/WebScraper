@@ -5,7 +5,8 @@
   "main": "js/ScraperClient.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rm -rf js && tsc"
+    "build": "rm -rf js && tsc",
+	"example": "node examples/listLinks.js"
   },
   "repository": {
     "type": "git",
