@@ -84,5 +84,5 @@ Parameter | Type    | Description | Required
 --------  | ---     | --- | ---
 url  | string | target url | yes
 scriptPath | string | absolute path of the JS script to inject | optional
-function | string or function | if string, it will be the name of the function to call from the injected script, if function, it will be a function injected into the page | optional
+function | string or function | if string, it will be the name of the function to call from the injected script ("scriptPath" must be specified too), if function, it will be a function injected into the page | optional
 args | object | object passed to the called function | optional
