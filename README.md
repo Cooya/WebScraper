@@ -7,6 +7,14 @@ Web scraper based on PhantomJS, designed as a connection client/server between t
 npm install @coya/web-scraper
 ```
 
+## Build (for dev)
+```
+git clone https://github.com/Cooya/WebScraper
+cd WebScraper
+npm install // it will also install the development dependencies
+npm run build
+```
+
 ## Usage examples
 The package allows to inject JS function (from the same file) :
 ```javascript
@@ -25,7 +33,7 @@ scraperClient.request({
     function: getLinks // function injected in the page environment
 })
 .then(function(result) {
-    console.log(result); // return value of the injected function
+    console.log(result); // returned value of the injected function
     scraperClient.closeScraper(); // end the client/server connection and kill the web scraper subprocess
 }, function(error) {
     console.error(error);
@@ -44,7 +52,7 @@ scraperClient.request({
     scriptPath: __dirname + '/externalScript.js', // external script exporting the function to be injected
 })
 .then(function(result) {
-    console.log(result); // return value of the injected function
+    console.log(result); // returned value of the injected function
     scraperClient.closeScraper(); // end the client/server connection and kill the web scraper subprocess
 }, function(error) {
     console.error(error);
