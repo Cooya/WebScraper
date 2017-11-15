@@ -13,6 +13,7 @@ git clone https://github.com/Cooya/WebScraper
 cd WebScraper
 npm install // it will also install the development dependencies
 npm run build
+node examples/listLinks.js
 ```
 
 ## Usage examples
