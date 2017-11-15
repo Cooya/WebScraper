@@ -3,7 +3,7 @@ declare const Promise;
 import child_process = require('child_process');
 import http = require('http');
 import path = require('path');
-import * as Logs from '@coya/services/logs';
+import * as Logs from '@coya/logs';
 
 const HOSTNAME = 'localhost';
 const PORT = 8080;
