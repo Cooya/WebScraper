@@ -3,6 +3,7 @@ declare const Promise;
 import child_process = require('child_process');
 import http = require('http');
 import path = require('path');
+import ps = require('ps-node');
 import * as Logs from '@coya/logs';
 
 const HOSTNAME = 'localhost';
@@ -36,33 +37,36 @@ export class ScraperClient {
 
 		const self = this;
 
-		return new Promise(function(resolve, reject) {
-			self.logs.info('Starting web scraper server...');
-			self.scraperProcess = child_process.exec('phantomjs ' + path.join(__dirname, SCRAPER_FILE), {cwd: __dirname});
-			if(!self.scraperProcess)
-				reject('The web scraper creation process has failed');
+		return self.killExistingProcessIfExists()
+		.then(function() {
+			return new Promise(function(resolve, reject) {
+				self.logs.info('Starting web scraper server...');
+				self.scraperProcess = child_process.exec('phantomjs ' + path.join(__dirname, SCRAPER_FILE), {cwd: __dirname});
+				if(!self.scraperProcess)
+					reject('The web scraper creation process has failed');
 
-			self.scraperProcess.on('exit', function(code) {
-				self.scraperProcess = null;
-				if(!self.requestsQueue.length) // unexpected exit
-					self.logs.error('The web scraper has crashed unexpectedly (code = ' + code + ').');
-				self.runScraper() // restart the server
-				.then(self.processRequestsQueue.bind(self), reject); // restarting to process the requests queue
-			});
+				self.scraperProcess.on('exit', function(code) {
+					self.scraperProcess = null;
+					if(!self.requestsQueue.length) // unexpected exit
+						self.logs.error('The web scraper has crashed unexpectedly (code = ' + code + ').');
+					self.runScraper() // restart the server
+					.then(self.processRequestsQueue.bind(self), reject); // restarting to process the requests queue
+				});
 
-			self.scraperProcess.stderr.on('data', function(data) {
-				self.logs.error(data);
-			});
+				self.scraperProcess.stderr.on('data', function(data) {
+					self.logs.error(data);
+				});
 
-			self.scraperProcess.stdout.on('data', function(data: string) {
-				let lines = data.trim().split('\n');
-				for(let line of lines)
-					if(line == 'ready') { // server is ready
-						self.logs.info('Web scraper ready.');
-						resolve();
-					}
-					else
-						self.logs.warning(line);
+				self.scraperProcess.stdout.on('data', function(data: string) {
+					let lines = data.trim().split('\n');
+					for(let line of lines)
+						if(line == 'ready') { // server is ready
+							self.logs.info('Web scraper ready.');
+							resolve();
+						}
+						else
+							self.logs.warning(line);
+				});
 			});
 		});
 	}
@@ -151,6 +155,29 @@ export class ScraperClient {
 				request.write(params);
 				request.end();
 			})();
+		});
+	}
+
+	private killExistingProcessIfExists() {
+		const self = this;
+
+		return new Promise(function(resolve, reject) {
+			ps.lookup({command: 'phantomjs',}, function(err, processList) {
+				if(err)
+					return reject(new Error(err));
+
+				if(!processList.length)
+					return resolve();
+
+				processList.forEach(function(process) {
+					ps.kill(process.pid, 'SIGKILL', function(err) {
+						if(err)
+							return reject(new Error(err));
+						self.logs.info('Existing PhantomJS process killed.');
+						resolve();
+					});
+				});
+			});
 		});
 	}
 
