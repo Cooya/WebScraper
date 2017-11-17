@@ -1,6 +1,6 @@
 {
   "name": "@coya/web-scraper",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Web scraper based on PhantomJS",
   "main": "js/ScraperClient.js",
   "scripts": {
