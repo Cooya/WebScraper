@@ -35,37 +35,35 @@ export class ScraperClient {
 		if(this.scraperProcess)
 			return Promise.resolve();
 
-		const self = this;
-
-		return self.killExistingProcessIfExists()
-		.then(function() {
-			return new Promise(function(resolve, reject) {
-				self.logs.info('Starting web scraper server...');
-				self.scraperProcess = child_process.exec('phantomjs ' + path.join(__dirname, SCRAPER_FILE), {cwd: __dirname});
-				if(!self.scraperProcess)
+		return this.killExistingProcessIfExists()
+		.then(() => {
+			return new Promise((resolve, reject) => {
+				this.logs.info('Starting web scraper server...');
+				this.scraperProcess = child_process.exec('phantomjs ' + path.join(__dirname, SCRAPER_FILE), {cwd: __dirname});
+				if(!this.scraperProcess)
 					reject('The web scraper creation process has failed');
 
-				self.scraperProcess.on('exit', function(code) {
-					self.scraperProcess = null;
-					if(!self.requestsQueue.length) // unexpected exit
-						self.logs.error('The web scraper has crashed unexpectedly (code = ' + code + ').');
-					self.runScraper() // restart the server
-					.then(self.processRequestsQueue.bind(self), reject); // restarting to process the requests queue
+				this.scraperProcess.on('exit', (code) => {
+					this.scraperProcess = null;
+					if(!this.requestsQueue.length) // unexpected exit
+						this.logs.error('The web scraper has crashed unexpectedly (code = ' + code + ').');
+					this.runScraper() // restart the server
+					.then(this.processRequestsQueue.bind(this), reject); // restarting to process the requests queue
 				});
 
-				self.scraperProcess.stderr.on('data', function(data) {
-					self.logs.error(data);
+				this.scraperProcess.stderr.on('data', (data) => {
+					this.logs.error(data);
 				});
 
-				self.scraperProcess.stdout.on('data', function(data: string) {
+				this.scraperProcess.stdout.on('data', (data) => {
 					let lines = data.trim().split('\n');
 					for(let line of lines)
 						if(line == 'ready') { // server is ready
-							self.logs.info('Web scraper ready.');
+							this.logs.info('Web scraper ready.');
 							resolve();
 						}
 						else
-							self.logs.warning(line);
+							this.logs.warning(line);
 				});
 			});
 		});
@@ -79,26 +77,26 @@ export class ScraperClient {
 			this.requestsCounter = 0;
 			this.logs.info('Sending exit request to scraper server...');
 			this.sendRequest(JSON.stringify({exit: true}))
-			.then(function(result) {
+			.then((result) => {
 				if(result != 'ok')
 					this.exit('Scraper server does not want to exit.');
-			}.bind(this), this.exit);
+			})
+			.catch(this.exit.bind(this));
 		}
 		else {
 			const currentRequest = this.requestsQueue[0];
 			this.logs.info('Requesting page with url = "' + currentRequest.parameters.url + '"...');
 			this.sendRequest(JSON.stringify(currentRequest.parameters))
-			.then(function(result) { // the request has succeeded
+			.then((result) => { // the request has succeeded
 				this.requestsQueue.shift();
 				if(this.requestsQueue.length)
 					this.processRequestsQueue();
 				currentRequest.resolve(result);
-			}.bind(this), currentRequest.reject);
+			}, currentRequest.reject);
 		}
 	}
 
 	private sendRequest(params) {
-		const self = this;
 		const opts = {
 			hostname: HOSTNAME,
 			port: PORT,
@@ -111,9 +109,9 @@ export class ScraperClient {
 			timeout: 30000
 		};
 
-		return new Promise(function(resolve, reject) {
+		return new Promise((resolve, reject) => {
 			(function send() {
-				const request = http.request(opts, function(res) {
+				const request = http.request(opts, (res) => {
 					let data = '';
 					res.on('data', (chunk) => {
 						data += chunk;
@@ -131,8 +129,8 @@ export class ScraperClient {
 							}
 							if(data['error']) {
 								if (data['error'] == 'page_opening_failed') {
-									self.logs.warning('The page opening has failed.');
-									setTimeout(send.bind(self)); // try again
+									this.logs.warning('The page opening has failed.');
+									setTimeout(send.bind(this)); // try again
 								}
 								else
 									reject(data); // fatal error
@@ -143,10 +141,10 @@ export class ScraperClient {
 					});
 				});
 
-				request.on('error', function(error) {
+				request.on('error', (error) => {
 					if(error['code'] == 'ECONNRESET') {
-						self.logs.warning('The connection to the scraper server has been reset.');
-						setTimeout(send.bind(self)); // try again
+						this.logs.warning('The connection to the scraper server has been reset.');
+						setTimeout(send.bind(this)); // try again
 					}
 					else
 						reject(error); // fatal error
@@ -159,21 +157,19 @@ export class ScraperClient {
 	}
 
 	private killExistingProcessIfExists() {
-		const self = this;
-
-		return new Promise(function(resolve, reject) {
-			ps.lookup({command: 'phantomjs',}, function(err, processList) {
+		return new Promise((resolve, reject) => {
+			ps.lookup({command: 'phantomjs',}, (err, processList) => {
 				if(err)
 					return reject(new Error(err));
 
 				if(!processList.length)
 					return resolve();
 
-				processList.forEach(function(process) {
-					ps.kill(process.pid, 'SIGKILL', function(err) {
+				processList.forEach((process) => {
+					ps.kill(process.pid, 'SIGKILL', (err) => {
 						if(err)
 							return reject(new Error(err));
-						self.logs.info('Existing PhantomJS process killed.');
+						this.logs.info('Existing PhantomJS process killed.');
 						resolve();
 					});
 				});
@@ -205,7 +201,7 @@ export class ScraperClient {
 		if(!params.url.startsWith('http://') && !params.url.startsWith('https://'))
 			params.url = 'http://' + params.url;
 
-		return new Promise(function(resolve, reject) {
+		return new Promise((resolve, reject) => {
 			this.requestsQueue.push({
 				resolve: resolve,
 				reject: reject, // scraper errors are rejected here
@@ -213,15 +209,16 @@ export class ScraperClient {
 			});
 			if(this.requestsQueue.length == 1) {
 				this.runScraper()
-				.then(this.processRequestsQueue.bind(this), this.exit); // connection errors are caught here
+				.then(this.processRequestsQueue.bind(this))
+				.catch(this.exit.bind(this)); // connection errors are caught here
 			}
-		}.bind(this));
+		});
 	}
 
 	public closeScraper() {
 		this.scraperProcess.removeAllListeners('exit');
 		return this.sendRequest(JSON.stringify({exit: true}))
-		.then(function(result) {
+		.then((result) => {
 			if(result != 'ok')
 				this.exit('Scraper server does not want to exit.');
 			else {
@@ -230,6 +227,7 @@ export class ScraperClient {
 				this.requestsCounter = 0;
 				this.logs.info('Web scraper process done and connection closed.');
 			}
-		}.bind(this), this.exit);
+		})
+		.catch(this.exit.bind(this));
 	}
 }
