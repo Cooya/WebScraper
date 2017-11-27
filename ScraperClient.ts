@@ -123,12 +123,12 @@ export class ScraperClient {
 							try {
 								data = JSON.parse(data);
 							}
-							catch (e) {
+							catch(e) {
 								reject({error: 'json_parse_error', data: data}); // fatal error
 								return;
 							}
 							if(data['error']) {
-								if (data['error'] == 'page_opening_failed') {
+								if(data['error'] == 'page_opening_failed') {
 									this.logs.warning('The page opening has failed.');
 									setTimeout(send.bind(this)); // try again
 								}
@@ -152,7 +152,7 @@ export class ScraperClient {
 
 				request.write(params);
 				request.end();
-			})();
+			}).call(this);
 		});
 	}
 
