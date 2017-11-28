@@ -2,13 +2,12 @@ declare const phantom;
 
 const fs = require('fs');
 const server = require('webserver').create();
+const system = require('system');
 const webpage = require('webpage');
 
 const JQUERY_PATH = './resources/jquery.js';
 const COOKIE_JAR = './resources/cookies.json';
 const DEBUG_SCREENSHOT = './resources/debug.png';
-const HOST = '127.0.0.1';
-const PORT = 8080;
 
 class PhantomScraper {
 	private scripts;
@@ -17,7 +16,7 @@ class PhantomScraper {
 		this.scripts = [];
 		PhantomScraper.importCookies();
 
-		server.listen(HOST + ':' + PORT, function(request, response) {
+		server.listen('127.0.0.1:' + system.args[1], function(request, response) {
 			response.statusCode = 200;
 			let req;
 			try {

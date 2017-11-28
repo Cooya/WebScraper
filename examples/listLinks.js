@@ -6,7 +6,11 @@ const getLinks = function() {
 	}).get();
 };
 
-const scraperClient = ScraperClient.getInstance();
+const scraperClient = ScraperClient.getInstance({
+	port: 8888,
+	//executionMode: 'prod',
+	//logsFilePath: 'logs.html'
+});
 
 scraperClient.request({
 	url: 'nicodev.fr',

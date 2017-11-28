@@ -6,28 +6,40 @@ import path = require('path');
 import ps = require('ps-node');
 import * as Logs from '@coya/logs';
 
-const HOSTNAME = 'localhost';
-const PORT = 8080;
 const SCRAPER_FILE = './PhantomScraper.js';
-const REQUESTS_LIMIT_BEFORE_REBOOT = 10;
 
 export class ScraperClient {
 	private static self = null;
-	private logs;
+	readonly hostname;
+	readonly port;
+	readonly requestsLimitBeforeReboot;
+	readonly timeout;
+	readonly logs;
 	private scraperProcess;
 	private requestsQueue;
 	private requestsCounter;
 
-	private constructor() {
-		this.logs = new Logs('scraper_client');
+	private constructor(config) {
+		this.hostname = 'localhost';
+		if(config) {
+			this.port = config.port || 8080;
+			this.requestsLimitBeforeReboot = config.requestsLimitBeforeReboot || 10;
+			this.timeout = config.timeout || 30000;
+		}
+		else {
+			this.port = 8080;
+			this.requestsLimitBeforeReboot = 10;
+			this.timeout = 30000;
+		}
+		this.logs = new Logs('scraper_client', config);
 		this.scraperProcess = null;
 		this.requestsQueue = [];
 		this.requestsCounter = 0;
 	}
 
-	public static getInstance() {
+	public static getInstance(config) {
 		if(ScraperClient.self == null)
-			ScraperClient.self = new ScraperClient();
+			ScraperClient.self = new ScraperClient(config);
 		return ScraperClient.self;
 	}
 
@@ -39,7 +51,7 @@ export class ScraperClient {
 		.then(() => {
 			return new Promise((resolve, reject) => {
 				this.logs.info('Starting web scraper server...');
-				this.scraperProcess = child_process.exec('phantomjs ' + path.join(__dirname, SCRAPER_FILE), {cwd: __dirname});
+				this.scraperProcess = child_process.exec('phantomjs ' + path.join(__dirname, SCRAPER_FILE) + ' ' + this.port, {cwd: __dirname});
 				if(!this.scraperProcess)
 					reject('The web scraper creation process has failed');
 
@@ -73,7 +85,7 @@ export class ScraperClient {
 		if(!this.requestsQueue.length)
 			this.exit('Bad call to function "processRequestsQueue()".');
 
-		if(++this.requestsCounter >= REQUESTS_LIMIT_BEFORE_REBOOT) { // need to reboot phantomJS for avoid too much memory consumption
+		if(++this.requestsCounter >= this.requestsLimitBeforeReboot) { // need to reboot phantomJS for avoid too much memory consumption
 			this.requestsCounter = 0;
 			this.logs.info('Sending exit request to scraper server...');
 			this.sendRequest(JSON.stringify({exit: true}))
@@ -98,15 +110,15 @@ export class ScraperClient {
 
 	private sendRequest(params) {
 		const opts = {
-			hostname: HOSTNAME,
-			port: PORT,
+			hostname: this.hostname,
+			port: this.port,
 			path: '/',
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 				'Content-Length': Buffer.byteLength(params)
 			},
-			timeout: 30000
+			timeout: this.timeout
 		};
 
 		return new Promise((resolve, reject) => {
