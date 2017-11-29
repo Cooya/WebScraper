@@ -82,18 +82,14 @@ export class ScraperClient {
 	}
 
 	private processRequestsQueue() {
-		if(!this.requestsQueue.length)
-			this.exit('Bad call to function "processRequestsQueue()".');
+		if(!this.requestsQueue.length) {
+			this.logs.error('Fatal error : bad call to function "processRequestsQueue()".');
+			process.exit(1);
+		}
 
 		if(++this.requestsCounter >= this.requestsLimitBeforeReboot) { // need to reboot phantomJS for avoid too much memory consumption
 			this.requestsCounter = 0;
-			this.logs.info('Sending exit request to scraper server...');
-			this.sendRequest(JSON.stringify({exit: true}))
-			.then((result) => {
-				if(result != 'ok')
-					this.exit('Scraper server does not want to exit.');
-			})
-			.catch(this.exit.bind(this));
+			this.sendExitRequest(); // and then wait for the "exit" event above
 		}
 		else {
 			const currentRequest = this.requestsQueue[0];
@@ -168,6 +164,18 @@ export class ScraperClient {
 		});
 	}
 
+	private sendExitRequest() {
+		this.logs.info('Sending exit request to scraper server...');
+		return this.sendRequest(JSON.stringify({exit: true}))
+		.then((result) => {
+			if(result != 'ok') {
+				this.logs.error(result);
+				this.logs.warning('Scraper server does not want to exit. Killing process by force...');
+				this.scraperProcess.kill();
+			}
+		});
+	}
+
 	private killExistingProcessIfExists() {
 		return new Promise((resolve, reject) => {
 			ps.lookup({command: 'phantomjs',}, (err, processList) => {
@@ -187,17 +195,6 @@ export class ScraperClient {
 				});
 			});
 		});
-	}
-
-	private exit(error) {
-		this.scraperProcess.removeAllListeners('exit');
-		this.scraperProcess.kill();
-		if(error) {
-			this.logs.error(error);
-			process.exit(1);
-		}
-		else
-			process.exit(0);
 	}
 
 	public request(params) {
@@ -222,24 +219,19 @@ export class ScraperClient {
 			if(this.requestsQueue.length == 1) {
 				this.runScraper()
 				.then(this.processRequestsQueue.bind(this))
-				.catch(this.exit.bind(this)); // connection errors are caught here
+				.catch(reject);
 			}
 		});
 	}
 
 	public closeScraper() {
 		this.scraperProcess.removeAllListeners('exit');
-		return this.sendRequest(JSON.stringify({exit: true}))
-		.then((result) => {
-			if(result != 'ok')
-				this.exit('Scraper server does not want to exit.');
-			else {
-				this.scraperProcess = null;
-				this.requestsQueue = [];
-				this.requestsCounter = 0;
-				this.logs.info('Web scraper process done and connection closed.');
-			}
-		})
-		.catch(this.exit.bind(this));
+		return this.sendExitRequest()
+		.then(() => {
+			this.scraperProcess = null;
+			this.requestsQueue = [];
+			this.requestsCounter = 0;
+			this.logs.info('Web scraper process done and connection closed.');
+		});
 	}
 }
