@@ -12,7 +12,7 @@ npm install @coya/web-scraper
 git clone https://github.com/Cooya/WebScraper
 cd WebScraper
 npm install // it will also install the development dependencies
-npm install phantomjs -g // PhantomJS need to be installed globally
+npm install phantomjs -g // PhantomJS needs to be installed globally
 npm run build
 npm run example // run the example script in "examples" folder
 ```
