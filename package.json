@@ -28,7 +28,6 @@
   "homepage": "https://github.com/Cooya/WebScraper#readme",
   "dependencies": {
     "@coya/logs": "0.0.5",
-    "phantomjs": "^2.1.7",
     "ps-node": "^0.1.6"
   },
   "devDependencies": {
