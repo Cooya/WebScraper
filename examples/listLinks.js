@@ -13,7 +13,7 @@ const scraperClient = ScraperClient.getInstance({
 });
 
 scraperClient.request({
-	url: 'nicodev.fr',
+	url: 'cooya.fr',
 	function: getLinks
 })
 .then(function(result) {
