@@ -62,8 +62,14 @@ class PhantomScraper {
 	private static createPage(referer: string, debugMode: boolean) {
 		const page = webpage.create();
 		if(debugMode) {
-			page.onError = function(msg) {
+			page.onError = function(msg, trace) {
 				console.log(msg);
+			};
+			page.onResourceError = function(resourceError) {
+				console.log(resourceError);
+			};
+			page.onResourceRequested = function(request) {
+				console.log(request);
 			};
 			page.onResourceTimeout = function(request) {
 				console.log('Timeout resource : ' + JSON.stringify(request));
@@ -74,9 +80,11 @@ class PhantomScraper {
 			page.onLoadStarted = function() {
 				console.log('Page loading started.');
 			};
-
 			page.onLoadFinished = function() {
 				console.log('Page loading finished.');
+			};
+			page.onNavigationRequested = function(url, type, willNavigate, main) {
+
 			};
 		}
 
