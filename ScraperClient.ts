@@ -137,7 +137,7 @@ export class ScraperClient {
 							}
 							if(data['error']) {
 								if(data['error'] == 'page_opening_failed') {
-									this.logs.warning('The page opening has failed.');
+									this.logs.warning('The page opening has failed, status : "' + data['status'] + '".');
 									setTimeout(send.bind(this)); // try again
 								}
 								else

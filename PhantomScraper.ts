@@ -127,7 +127,7 @@ class PhantomScraper {
 			try {
 				if(status !== 'success' || !page.evaluateJavaScript('function() { return !!document.body; }')) {
 					PhantomScraper.closePage(page);
-					callback({error: 'page_opening_failed', msg: 'An error has occurred when opening the page.'});
+					callback({error: 'page_opening_failed', msg: 'An error has occurred when opening the page.', status: status});
 				}
 				else {
 					if(args.debug) page.render(DEBUG_SCREENSHOT);
