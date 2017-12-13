@@ -5,6 +5,10 @@ const server = require('webserver').create();
 const system = require('system');
 const webpage = require('webpage');
 
+console.error = function() {
+    system.stderr.write(Array.prototype.join.call(arguments, ' ') + '\n');
+};
+
 const JQUERY_PATH = './resources/jquery.js';
 const COOKIE_JAR = './resources/cookies.json';
 const DEBUG_SCREENSHOT = './resources/debug.png';
