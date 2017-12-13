@@ -8,13 +8,16 @@ const getLinks = function() {
 
 const scraperClient = ScraperClient.getInstance({
 	port: 8888,
-	//executionMode: 'prod',
+	executionMode: 'debug',
 	//logsFilePath: 'logs.html'
 });
 
 scraperClient.request({
 	url: 'cooya.fr',
-	function: getLinks
+	function: getLinks,
+	args: {
+		debug: true
+	}
 })
 .then(function(result) {
 	console.log(result);

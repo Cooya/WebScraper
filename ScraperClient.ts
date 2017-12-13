@@ -66,7 +66,7 @@ export class ScraperClient {
 				});
 
 				this.scraperProcess.stderr.on('data', (data) => {
-					this.logs.error(data);
+					this.logs.warning(data);
 				});
 
 				this.scraperProcess.stdout.on('data', (data) => {
@@ -77,7 +77,7 @@ export class ScraperClient {
 							resolve();
 						}
 						else
-							this.logs.warning(line);
+							this.logs.debug(line);
 				});
 			});
 		});
@@ -141,7 +141,7 @@ export class ScraperClient {
 								if(data['error'] == 'page_opening_failed') {
 									this.logs.warning('The page opening has failed, status : "' + data['status'] + '".');
 									if(++this.requestsFailedInARow < 10)
-										send(); // try again
+										send.call(this); // try again
 									else {
 										this.requestsCounter = 0;
 										this.requestsFailedInARow = 0;
@@ -162,7 +162,7 @@ export class ScraperClient {
 				request.on('error', (error) => {
 					if(error['code'] == 'ECONNRESET') {
 						this.logs.warning('The connection to the scraper server has been reset.');
-						send(); // try again
+						send.call(this); // try again
 					}
 					else
 						reject(error); // fatal error

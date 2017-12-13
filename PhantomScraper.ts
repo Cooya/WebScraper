@@ -63,16 +63,17 @@ class PhantomScraper {
 		const page = webpage.create();
 		if(debugMode) {
 			page.onError = function(msg, trace) {
-				console.log(msg);
+				console.error(msg);
 			};
 			page.onResourceError = function(resourceError) {
-				console.log(resourceError);
-			};
-			page.onResourceRequested = function(request) {
-				console.log(request);
+				console.error(resourceError);
 			};
 			page.onResourceTimeout = function(request) {
-				console.log('Timeout resource : ' + JSON.stringify(request));
+				console.error('Timeout resource : ' + JSON.stringify(request));
+			};
+
+			page.onResourceRequested = function(request) {
+				console.log(JSON.stringify(request, undefined, 4));
 			};
 			page.onConsoleMessage = function(msg, lineNum, sourceId) {
 				console.log(msg);
