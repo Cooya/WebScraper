@@ -6,7 +6,7 @@ const system = require('system');
 const webpage = require('webpage');
 
 console.error = function() {
-    system.stderr.write(Array.prototype.join.call(arguments, ' ') + '\n');
+    system.stderr.write(Array.prototype.join.call(arguments, ' '));
 };
 
 const JQUERY_PATH = './resources/jquery.js';
@@ -67,13 +67,13 @@ class PhantomScraper {
 		const page = webpage.create();
 		if(debugMode) {
 			page.onError = function(msg, trace) {
-				console.error(msg);
+				console.error('Error :', msg);
 			};
 			page.onResourceError = function(resourceError) {
-				console.error(resourceError);
+				console.error('Resource error :', JSON.stringify(resourceError));
 			};
 			page.onResourceTimeout = function(request) {
-				console.error('Timeout resource : ' + JSON.stringify(request));
+				console.error('Timeout resource :', JSON.stringify(request));
 			};
 
 			page.onResourceRequested = function(request) {
