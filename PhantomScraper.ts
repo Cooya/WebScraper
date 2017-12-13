@@ -73,7 +73,7 @@ class PhantomScraper {
 			};
 
 			page.onResourceRequested = function(request) {
-				console.log(JSON.stringify(request, undefined, 4));
+				//console.log(JSON.stringify(request, undefined, 4)); // too much data to display
 			};
 			page.onConsoleMessage = function(msg, lineNum, sourceId) {
 				console.log(msg);
@@ -81,15 +81,15 @@ class PhantomScraper {
 			page.onLoadStarted = function() {
 				console.log('Page loading started.');
 			};
-			page.onLoadFinished = function() {
-				console.log('Page loading finished.');
+			page.onLoadFinished = function(status) {
+				console.log('Page loading finished, status : "' + status + '".');
 			};
 			page.onNavigationRequested = function(url, type, willNavigate, main) {
 
 			};
 		}
 
-		page.onResourceReceived = function() {
+		page.onResourceReceived = function(response) {
 			fs.write(COOKIE_JAR, JSON.stringify(phantom.cookies), 'w');
 		};
 		page.settings.userAgent = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:56.0) Gecko/20100101 Firefox/56.0';
