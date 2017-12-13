@@ -89,10 +89,8 @@ export class ScraperClient {
 			process.exit(1);
 		}
 
-		if(++this.requestsCounter >= this.requestsLimitBeforeReboot) { // need to reboot phantomJS for avoid too much memory consumption
-			this.requestsCounter = 0;
+		if(++this.requestsCounter >= this.requestsLimitBeforeReboot) // need to reboot phantomJS for avoid too much memory consumption
 			this.sendExitRequest(); // and then wait for the "exit" event above
-		}
 		else {
 			const currentRequest = this.requestsQueue[0];
 			this.logs.info('Requesting page with url = "' + currentRequest.parameters.url + '"...');
@@ -140,13 +138,12 @@ export class ScraperClient {
 							if(data['error']) {
 								if(data['error'] == 'page_opening_failed') {
 									this.logs.warning('The page opening has failed, status : "' + data['status'] + '".');
-									if(++this.requestsFailedInARow < 10)
+									//if(++this.requestsFailedInARow < 10)
 										setTimeout(send.bind(this), 3000); // try again
-									else {
-										this.requestsCounter = 0;
-										this.requestsFailedInARow = 0;
-										this.sendExitRequest(); // restart the scraper
-									}
+									//else {
+										//this.requestsFailedInARow = 0;
+										//this.sendExitRequest(); // restart the scraper
+									//}
 								}
 								else
 									reject(data); // fatal error
@@ -176,6 +173,7 @@ export class ScraperClient {
 
 	private sendExitRequest() {
 		this.logs.info('Sending exit request to scraper server...');
+		this.requestsCounter = 0;
 		return this.sendRequest(JSON.stringify({exit: true}))
 		.then((result) => {
 			if(result != 'ok') {
@@ -240,7 +238,6 @@ export class ScraperClient {
 		.then(() => {
 			this.scraperProcess = null;
 			this.requestsQueue = [];
-			this.requestsCounter = 0;
 			this.logs.info('Web scraper process done and connection closed.');
 		});
 	}
