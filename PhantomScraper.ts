@@ -86,8 +86,7 @@ class PhantomScraper {
 				console.log('Page loading finished, status : "' + status + '".');
 			};
 			page.onResourceRequested = function(requestData, networkRequest) {
-				if(requestData.url.startsWith('https://www.f-cdn.com/assets/'))
-					networkRequest.cancel();
+				
 			};
 			page.onNavigationRequested = function(url, type, willNavigate, main) {
 
