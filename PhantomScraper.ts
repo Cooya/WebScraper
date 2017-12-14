@@ -85,8 +85,9 @@ class PhantomScraper {
 			page.onLoadFinished = function(status) {
 				console.log('Page loading finished, status : "' + status + '".');
 			};
-			page.onResourceRequested = function(request) {
-				//console.log(JSON.stringify(request, undefined, 4)); // too much data to display
+			page.onResourceRequested = function(requestData, networkRequest) {
+				if(requestData.url.startsWith('https://www.f-cdn.com/assets/'))
+					networkRequest.cancel();
 			};
 			page.onNavigationRequested = function(url, type, willNavigate, main) {
 
