@@ -72,6 +72,9 @@ class PhantomScraper {
 			page.onResourceTimeout = function(request) {
 				console.error('Timeout resource :', JSON.stringify(request));
 			};
+			page.onResourceError = function(resourceError) {
+				console.error('Resource error :', JSON.stringify(resourceError));
+			};
 
 			page.onConsoleMessage = function(msg, lineNum, sourceId) {
 				console.log(msg);
@@ -82,18 +85,12 @@ class PhantomScraper {
 			page.onLoadFinished = function(status) {
 				console.log('Page loading finished, status : "' + status + '".');
 			};
-
-			/*
-			page.onResourceError = function(resourceError) {
-				console.error('Resource error :', JSON.stringify(resourceError));
-			};
 			page.onResourceRequested = function(request) {
-				console.log(JSON.stringify(request, undefined, 4)); // too much data to display
+				//console.log(JSON.stringify(request, undefined, 4)); // too much data to display
 			};
 			page.onNavigationRequested = function(url, type, willNavigate, main) {
 
 			};
-			*/
 		}
 
 		page.onResourceReceived = function(response) {

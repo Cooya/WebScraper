@@ -18,7 +18,6 @@ export class ScraperClient {
 	private scraperProcess;
 	private requestsQueue;
 	private requestsCounter;
-	private requestsFailedInARow;
 
 	private constructor(config) {
 		this.hostname = 'localhost';
@@ -36,7 +35,6 @@ export class ScraperClient {
 		this.scraperProcess = null;
 		this.requestsQueue = [];
 		this.requestsCounter = 0;
-		this.requestsFailedInARow = 0;
 	}
 
 	public static getInstance(config) {
@@ -138,18 +136,12 @@ export class ScraperClient {
 							if(data['error']) {
 								if(data['error'] == 'page_opening_failed') {
 									this.logs.warning('The page opening has failed, status : "' + data['status'] + '".');
-									//if(++this.requestsFailedInARow < 10)
-										setTimeout(send.bind(this), 3000); // try again
-									//else {
-										//this.requestsFailedInARow = 0;
-										//this.sendExitRequest(); // restart the scraper
-									//}
+									setTimeout(send.bind(this), 3000); // try again
 								}
 								else
 									reject(data); // fatal error
 							}
 							else {
-								this.requestsFailedInARow = 0;
 								resolve(data['result']); // the request has succeeded
 							}
 						}
@@ -159,7 +151,7 @@ export class ScraperClient {
 				request.on('error', (error) => {
 					if(error['code'] == 'ECONNRESET') {
 						this.logs.warning('The connection to the scraper server has been reset.');
-						send.call(this); // try again
+						setTimeout(send.bind(this), 3000); // try again
 					}
 					else
 						reject(error); // fatal error
