@@ -18,7 +18,6 @@ export class ScraperClient {
 	private scraperProcess;
 	private requestsQueue;
 	private requestsCounter;
-	private requestsFailedInARow;
 
 	private constructor(config) {
 		this.hostname = 'localhost';
@@ -36,7 +35,6 @@ export class ScraperClient {
 		this.scraperProcess = null;
 		this.requestsQueue = [];
 		this.requestsCounter = 0;
-		this.requestsFailedInARow = 0;
 	}
 
 	public static getInstance(config) {
@@ -100,15 +98,7 @@ export class ScraperClient {
 				if(this.requestsQueue.length)
 					this.processRequestsQueue();
 				currentRequest.resolve(result);
-			})
-			.catch((err) => {
-				if(err.next_time) { // if too much erros in a row, we push the current request at the end of the queue
-					this.requestsQueue.push(this.requestsQueue.shift());
-					this.processRequestsQueue();
-				}
-				else
-					currentRequest.reject(err); // fatal error, the queue process is interrupted
-			});
+			}, currentRequest.reject);
 		}
 	}
 
@@ -125,7 +115,7 @@ export class ScraperClient {
 			timeout: this.timeout
 		};
 
-		this.requestsFailedInARow = 0;
+		let pageOpeningsFailedCounter = 0;
 		return new Promise((resolve, reject) => {
 			(function send() {
 				const request = http.request(opts, (res) => {
@@ -147,8 +137,8 @@ export class ScraperClient {
 							if(data['error']) {
 								if(data['error'] == 'page_opening_failed') {
 									this.logs.warning('The page opening has failed, status : "' + data['status'] + '".');
-									if(++this.requestsFailedInARow >= 5)
-										reject({next_time: true});
+									if(++pageOpeningsFailedCounter >= 5)
+										reject({error: 'page_opening_failed'});
 									else
 										setTimeout(send.bind(this), 3000); // try again
 								}
