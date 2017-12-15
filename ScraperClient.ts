@@ -6,7 +6,8 @@ import path = require('path');
 import ps = require('ps-node');
 import * as Logs from '@coya/logs';
 
-const SCRAPER_FILE = './PhantomScraper.js';
+const SCRAPER_FILE = path.join(__dirname, 'PhantomScraper.js');
+const SCRAPER_CONFIG_FILE = path.join(__dirname, 'resources/config.json');
 
 export class ScraperClient {
 	private static self = null;
@@ -51,7 +52,7 @@ export class ScraperClient {
 		.then(() => {
 			return new Promise((resolve, reject) => {
 				this.logs.info('Starting web scraper server...');
-				this.scraperProcess = child_process.exec('phantomjs ' + path.join(__dirname, SCRAPER_FILE) + ' ' + this.port, {cwd: __dirname});
+				this.scraperProcess = child_process.exec(['phantomjs',  '--config=' + SCRAPER_CONFIG_FILE, SCRAPER_FILE, this.port].join(' '), {cwd: __dirname});
 				if(!this.scraperProcess)
 					reject('The web scraper creation process has failed');
 

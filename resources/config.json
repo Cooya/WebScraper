@@ -1,0 +1,7 @@
+{
+	"printDebugMessages": false,
+	"autoLoadImages": false,
+	"ignoreSslErrors": true,
+	"diskCacheEnabled": true,
+	"diskCachePath": "cache"
+}
