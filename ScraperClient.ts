@@ -93,12 +93,18 @@ export class ScraperClient {
 			const currentRequest = this.requestsQueue[0];
 			this.logs.info('Requesting page with url = "' + currentRequest.parameters.url + '"...');
 			this.sendRequest(JSON.stringify(currentRequest.parameters))
-			.then((result) => { // the request has succeeded
+			.then((result) => {
 				this.requestsQueue.shift();
 				if(this.requestsQueue.length)
 					this.processRequestsQueue();
 				currentRequest.resolve(result);
-			}, currentRequest.reject);
+			})
+			.catch((err) => {
+				this.requestsQueue.shift();
+				if(this.requestsQueue.length)
+					this.processRequestsQueue();
+				currentRequest.reject(err);
+			});
 		}
 	}
 
