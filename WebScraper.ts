@@ -125,7 +125,7 @@ export class WebScraper {
 		const page = await this.browser.newPage();
 		await page.setViewport({width: 1600, height: 900});
 		//await page.setUserAgent('Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0');
-		//await page.setRequestInterception(true);
+		await page.setRequestInterception(true);
 		await this.loadCookies(COOKIE_JAR, page);
 
 		if(debug) {
@@ -148,13 +148,13 @@ export class WebScraper {
 					req.continue();
 			});
 			page.on('requestfailed', req => {
-				this.logs.error(req);
+				//this.logs.error(req);
 			});
 			page.on('requestfinished', req => {
-				this.logs.debug(req);
+				//this.logs.debug(req);
 			});
 			page.on('response', res => {
-				this.logs.debug(res);
+				//this.logs.debug(res);
 			});
 		}
 
@@ -169,19 +169,27 @@ export class WebScraper {
 				//'Cache-Control': 'no-cache'
 			});
 
-		this.logs.debug('Page created.');		
+		this.logs.debug('Page created.');
 		return page;
 	}
 
 	private loadCookies(cookiesFile: string, page) {
 		this.logs.debug('Loading cookies...');
 		return new Promise((resolve, reject) => {
-			fs.readFile(cookiesFile, async (err, data: any) => {
+			fs.readFile(cookiesFile, async (err, cookies: any) => {
 				if(err && err.code != 'ENOENT')
 					reject(err);
 
-				if(!err && data && data != '' && data != '{}')
-					await page.setCookie(...JSON.parse(data));
+				if(!err && cookies) {
+					cookies = JSON.parse(cookies);
+					if(Array.isArray(cookies))
+						for(let cookie of cookies) {
+							try {
+								await page.setCookie(cookie);
+							}
+							catch(e) {} // sometimes it may fail (when "expires" value is not an integer for example)
+						}
+				}
 				this.logs.debug('Cookies loaded.');
 				resolve();
 			});

@@ -11,7 +11,7 @@ const scraper = new ChromeScraper({executionMode: 'debug'});
 scraper.request({
 	url: 'cooya.fr',
 	fct: getLinks,
-	debug: false
+	debug: true
 })
 .then(function(result) {
 	console.log(result);
