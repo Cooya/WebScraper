@@ -5,8 +5,9 @@
   "main": "js/ScraperClient.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rm -rf js && tsc && cp resources/config.json js/resources/config.json",
-    "example": "node examples/listLinks.js"
+    "build": "tsc -p es5-tsconfig.json && tsc -p es8-tsconfig.json && cp resources/config.json js/resources/config.json",
+    "example": "node examples/listLinks.js",
+    "example2": "node examples/listLinksNewVersion.js"
   },
   "repository": {
     "type": "git",

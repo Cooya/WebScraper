@@ -12,7 +12,7 @@
 		"types": [ "node" ],
 		"allowJs": true
 	},
-	"exclude": [
-		"examples"
+	"include": [
+		"WebScraper.ts"
 	]
 }

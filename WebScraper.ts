@@ -85,7 +85,7 @@ export class WebScraper {
 		try {
 			if(!this.browser) {
 				this.logs.info('Starting headless browser...');
-				this.browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: false});
+				this.browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: true});
 				this.logs.info('Headless browser started.');
 			}
 
