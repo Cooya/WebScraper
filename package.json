@@ -27,8 +27,9 @@
   },
   "homepage": "https://github.com/Cooya/WebScraper#readme",
   "dependencies": {
-    "@coya/logs": "0.2.0",
-    "ps-node": "^0.1.6"
+    "@coya/logs": "0.2.1",
+    "ps-node": "^0.1.6",
+    "puppeteer": "^0.13.0"
   },
   "devDependencies": {
     "@types/node": "^8.0.50",

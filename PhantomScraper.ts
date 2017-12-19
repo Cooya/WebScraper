@@ -6,7 +6,7 @@ const system = require('system');
 const webpage = require('webpage');
 
 console.error = function() {
-    system.stderr.write(Array.prototype.join.call(arguments, ' '));
+	system.stderr.write(Array.prototype.join.call(arguments, ' '));
 };
 
 const JQUERY_PATH = './resources/jquery.js';
