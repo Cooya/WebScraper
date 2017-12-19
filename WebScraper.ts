@@ -1,11 +1,10 @@
-import path = require('path');
 import * as Logs from '@coya/logs';
 import * as fs from 'fs';
 const puppeteer = require('puppeteer');
 
-const JQUERY_PATH = './resources/jquery.js';
-const COOKIE_JAR = './resources/cookies.json';
-const DEBUG_SCREENSHOT = './resources/debug.png';
+const JQUERY_PATH = __dirname + '/resources/jquery.js';
+const COOKIE_JAR = __dirname + '/resources/cookies.json';
+const DEBUG_SCREENSHOT = __dirname + '/resources/debug.png';
 
 interface Req {
 	url: string,
@@ -16,6 +15,7 @@ interface Req {
 }
 
 export class WebScraper {
+	private static self = null;
 	readonly logs;
 	readonly requestsLimitBeforeReboot;
 	private browser;
@@ -23,13 +23,19 @@ export class WebScraper {
 	private globalRequestsCounter;
 	private requestsCounter;
 
-	constructor(config = {requestsLimitBeforeReboot: 100}) {
+	private constructor(config = {requestsLimitBeforeReboot: 100}) {
 		this.logs = new Logs('web_scraper', config);
 		this.requestsLimitBeforeReboot = config.requestsLimitBeforeReboot;
 		this.browser = null;
 		this.requestsQueue = [];
 		this.globalRequestsCounter = 0;
 		this.requestsCounter = 0;
+	}
+
+	public static getInstance(config) {
+		if(WebScraper.self == null)
+			WebScraper.self = new WebScraper(config);
+		return WebScraper.self;
 	}
 
 	public request(req: Req) { // append a user request into the requests queue
