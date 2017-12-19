@@ -1,4 +1,4 @@
-const { ScraperClient } = require('../js/ScraperClient.js');
+const { PhantomScraper } = require('../js/entryPoint');
 
 const getLinks = function() {
 	return $('a').map(function(i, elt) {
@@ -6,13 +6,12 @@ const getLinks = function() {
 	}).get();
 };
 
-const scraperClient = ScraperClient.getInstance({
+const scraper = PhantomScraper.getInstance({
 	port: 8888,
-	executionMode: 'debug',
-	//logsFilePath: 'logs.html'
+	executionMode: 'debug'
 });
 
-scraperClient.request({
+scraper.request({
 	url: 'cooya.fr',
 	function: getLinks,
 	args: {
@@ -21,8 +20,8 @@ scraperClient.request({
 })
 .then(function(result) {
 	console.log(result);
-	scraperClient.closeScraper();
+	scraper.closeScraper();
 }, function(error) {
 	console.error(error);
-	scraperClient.closeScraper();
+	scraper.closeScraper();
 });

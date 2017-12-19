@@ -1,4 +1,4 @@
-const {WebScraper} = require('../js/WebScraper.js');
+const { ChromeScraper } = require('../js/entryPoint');
 
 const getLinks = function() {
 	return $('a').map(function(i, elt) {
@@ -6,7 +6,7 @@ const getLinks = function() {
 	}).get();
 };
 
-const scraper = new WebScraper({executionMode: 'debug'});
+const scraper = new ChromeScraper({executionMode: 'debug'});
 
 scraper.request({
 	url: 'cooya.fr',

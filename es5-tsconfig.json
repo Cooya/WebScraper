@@ -16,6 +16,7 @@
 		"examples",
 		"js",
 		"node_modules",
+		"entryPoint.js",
 		"WebScraper.ts"
 	]
 }

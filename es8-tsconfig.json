@@ -13,6 +13,7 @@
 		"allowJs": true
 	},
 	"include": [
+		"entryPoint.js",
 		"WebScraper.ts"
 	]
 }
