@@ -2,7 +2,7 @@
   "name": "@coya/web-scraper",
   "version": "0.1.2",
   "description": "Web scraper on top of PhantomJS or Chromium",
-  "main": "js/ScraperClient.js",
+  "main": "js/entryPoint.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc -p es5-tsconfig.json && tsc -p es8-tsconfig.json && cp resources/config.json js/resources/config.json",
