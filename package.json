@@ -1,6 +1,6 @@
 {
   "name": "@coya/web-scraper",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Web scraper on top of PhantomJS or Chromium",
   "main": "js/entryPoint.js",
   "scripts": {
