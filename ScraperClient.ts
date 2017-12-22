@@ -9,6 +9,15 @@ import * as Logs from '@coya/logs';
 const SCRAPER_FILE = path.join(__dirname, 'PhantomScraper.js');
 const SCRAPER_CONFIG_FILE = path.join(__dirname, 'resources/config.json');
 
+interface Req {
+	url: string,
+	fct: Function | string,
+	fctAsString?: string, // set by the scraper client himself
+	args?: Object,
+	referer?: string,
+	debug?: boolean
+}
+
 export class ScraperClient {
 	private static self = null;
 	readonly hostname;
@@ -52,7 +61,7 @@ export class ScraperClient {
 		.then(() => {
 			return new Promise((resolve, reject) => {
 				this.logs.info('Starting web scraper server...');
-				this.scraperProcess = child_process.exec(['phantomjs',  '--config=' + SCRAPER_CONFIG_FILE, SCRAPER_FILE, this.port].join(' '), {cwd: __dirname});
+				this.scraperProcess = child_process.exec(['phantomjs', '--config=' + SCRAPER_CONFIG_FILE, SCRAPER_FILE, this.port].join(' '), {cwd: __dirname});
 				if(!this.scraperProcess)
 					reject('The web scraper creation process has failed');
 
@@ -92,8 +101,8 @@ export class ScraperClient {
 			this.sendExitRequest(); // and then wait for the "exit" event above
 		else {
 			const currentRequest = this.requestsQueue[0];
-			this.logs.info('Requesting page with url = "' + currentRequest.parameters.url + '"...');
-			this.sendRequest(JSON.stringify(currentRequest.parameters))
+			this.logs.info('Requesting page with url = "' + currentRequest.content.url + '"...');
+			this.sendRequest(JSON.stringify(currentRequest.content))
 			.then((result) => {
 				this.requestsQueue.shift();
 				if(this.requestsQueue.length)
@@ -109,7 +118,7 @@ export class ScraperClient {
 		}
 	}
 
-	private sendRequest(params) {
+	private sendRequest(content) {
 		const opts = {
 			hostname: this.hostname,
 			port: this.port,
@@ -117,7 +126,7 @@ export class ScraperClient {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				'Content-Length': Buffer.byteLength(params)
+				'Content-Length': Buffer.byteLength(content)
 			},
 			timeout: this.timeout
 		};
@@ -167,7 +176,7 @@ export class ScraperClient {
 						reject(error); // fatal error
 				});
 
-				request.write(params);
+				request.write(content);
 				request.end();
 			}).call(this);
 		});
@@ -207,26 +216,25 @@ export class ScraperClient {
 		});
 	}
 
-	public request(params) { // append a user request into the requests queue
-		if(!params.url)
-			return Promise.reject('"url" parameter is required.');
-		if(!params.scriptPath) {
-			if(!params.function)
-				return Promise.reject('"scriptPath" or/and "function" parameters are required.');
-			else
-				params.function = params.function.toString();
-		}
-
-		if(!params.url.startsWith('http://') && !params.url.startsWith('https://'))
-			params.url = 'http://' + params.url;
-
+	public request(req: Req) { // append a user request into the requests queue
 		return new Promise((resolve, reject) => {
+		if(!req.url)
+				return reject('"url" parameter is required.');
+		if(!req.fct)
+				return reject('"fct" parameter is required.');
+
+		if(req.url.indexOf('http://') != 0 && req.url.indexOf('https://') != 0)
+			req.url = 'http://' + req.url;
+
+		if(typeof req.fct == 'function')
+			req.fctAsString = req.fct.toString();
+		
 			this.requestsQueue.push({
 				resolve: resolve,
 				reject: reject, // scraper errors are rejected here
-				parameters: params
+				content: req
 			});
-			if(this.requestsQueue.length == 1) {
+			if(this.requestsQueue.length == 1) {  // requests queue need to be processed
 				this.runScraper()
 				.then(this.processRequestsQueue.bind(this))
 				.catch(reject);

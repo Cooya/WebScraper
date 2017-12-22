@@ -87,11 +87,16 @@ export class WebScraper {
 		}); // no possible rejection
 	}
 
-	private async scrap(req) {
+	private async scrap(req: Req) {
 		try {
 			if(!this.browser) {
 				this.logs.info('Starting headless browser...');
-				this.browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox'], headless: true});
+				this.browser = await puppeteer.launch({
+					args: ['--no-sandbox', '--disable-setuid-sandbox'],
+					devtools: false,
+					headless: true,
+					ignoreHTTPSErrors: true
+				});
 				this.logs.info('Headless browser started.');
 			}
 
@@ -117,16 +122,29 @@ export class WebScraper {
 	}
 
 	private async createPage(referer: string, debug: boolean) {
-		if(debug)
-			this.logs.debug('Creating new page in debugging mode...');
-		else
-			this.logs.debug('Creating new page...');
+		this.logs.debug('Creating new page...');
+
+		const defaultViewport = {
+			deviceScaleFactor: 1,
+			hasTouch: false,
+			height: 1024,
+			isLandscape: false,
+			isMobile: false,
+			width: 1280
+		};
 
 		const page = await this.browser.newPage();
-		await page.setViewport({width: 1600, height: 900});
+		await page.setViewport(defaultViewport);
 		//await page.setUserAgent('Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0');
 		await page.setRequestInterception(true);
 		await this.loadCookies(COOKIE_JAR, page);
+
+		page.on('request', req => {
+			if(req.url.match(/\.(png|jpg|jpeg|gif)$/)) // avoid images loading
+				req.abort();
+			else
+				req.continue();
+		});
 
 		if(debug) {
 			page.once('load', () => {
@@ -141,20 +159,15 @@ export class WebScraper {
 			page.on('pageerror', err => {
 				this.logs.error(err);
 			});
-			page.on('request', req => {
-				if(req.url.match(/\.(png|jpg|jpeg|gif)$/)) // avoid images loading
-					req.abort();
-				else
-					req.continue();
-			});
 			page.on('requestfailed', req => {
-				//this.logs.error(req);
+				if(!req.url.match(/\.(png|jpg|jpeg|gif)$/))
+					this.logs.warning('Request failed : ' + req.url);
 			});
-			page.on('requestfinished', req => {
-				//this.logs.debug(req);
-			});
+			/*page.on('requestfinished', req => {
+				this.logs.debug('Request finished : ' + req.url);
+			});*/
 			page.on('response', res => {
-				//this.logs.debug(res);
+				this.logs.debug('Response received : ' + res.url);
 			});
 		}
 

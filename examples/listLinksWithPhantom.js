@@ -1,4 +1,4 @@
-const { ChromeScraper } = require('../js/entryPoint');
+const { PhantomScraper } = require('../js/entryPoint');
 
 const getLinks = function() {
 	return $('a').map(function(i, elt) {
@@ -6,7 +6,10 @@ const getLinks = function() {
 	}).get();
 };
 
-const scraper = new ChromeScraper({executionMode: 'debug'});
+const scraper = PhantomScraper.getInstance({
+	port: 8888,
+	executionMode: 'debug'
+});
 
 scraper.request({
 	url: 'cooya.fr',
@@ -15,8 +18,8 @@ scraper.request({
 })
 .then(function(result) {
 	console.log(result);
-	scraper.close();
+	scraper.closeScraper();
 }, function(error) {
 	console.error(error);
-	scraper.close();
+	scraper.closeScraper();
 });

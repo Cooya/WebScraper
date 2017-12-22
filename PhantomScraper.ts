@@ -39,23 +39,18 @@ class PhantomScraper {
 				return;
 			}
 
-			if(req.scriptPath && !this.scripts[req.scriptPath])
-				this.scripts[req.scriptPath] = require(req.scriptPath);
+			let fct;
+			if(req.fctAsString)
+				fct = req.fctAsString;
+			else {
+				const parts = req.fct.split('#');
+				if(!this.scripts[parts[0]])
+					this.scripts[parts[0]] = require(parts[0]);
 
-			if(!req.args)
-				req.args = {};
-
-			let action;
-			if(req.scriptPath) { // evaluate a function in a file
-				action = req.function ? this.scripts[req.scriptPath][req.function] : this.scripts[req.scriptPath];
-				req.args.evaluationType = 'file';
-			}
-			else { // evaluate a function in a string
-				action = req.function;
-				req.args.evaluationType = 'string';	
+				fct = parts.length > 1 ? this.scripts[parts[0]][parts[1]] : this.scripts[parts[0]];
 			}
 
-			PhantomScraper.scrap(req.url, action, req.args, function(result) {
+			PhantomScraper.scrap(req.url, fct, req.args, req.referer, req.debug, function(result) {
 				response.write(JSON.stringify(result));
 				response.close();
 			});
@@ -63,9 +58,9 @@ class PhantomScraper {
 		console.log('ready');
 	}
 
-	private static createPage(referer: string, debugMode: boolean) {
+	private static createPage(referer: string, debug: boolean) {
 		const page = webpage.create();
-		if(debugMode) {
+		if(debug) {
 			page.onError = function(msg, trace) {
 				console.error('Error :', msg);
 			};
@@ -133,9 +128,9 @@ class PhantomScraper {
 		}
 	}
 
-	private static scrap(url, action, args, callback) {
-		let page = PhantomScraper.createPage(args.referer, args.debug);
-
+	private static scrap(url, fct, args, referer, debug, callback) {
+		let page = PhantomScraper.createPage(referer, debug);
+		
 		page.open(url, function(status) {
 			try {
 				if(status !== 'success' || !page.evaluateJavaScript('function() { return !!document.body; }')) {
@@ -143,23 +138,11 @@ class PhantomScraper {
 					callback({error: 'page_opening_failed', msg: 'An error has occurred when opening the page.', status: status});
 				}
 				else {
-					if(args.debug) page.render(DEBUG_SCREENSHOT);
+					if(debug) page.render(DEBUG_SCREENSHOT);
 					if(page.injectJs(JQUERY_PATH)) {
-						if(args.complex) {
-							action(page, waitFor, args, function(result) {
-								PhantomScraper.closePage(page);
-								callback({result: result})
-							});
-						}
-						else {
-							let result;
-							if(args.evaluationType == 'file')
-								result = page.evaluate(action, args);
-							else
-								result = page.evaluateJavaScript(action);
-							PhantomScraper.closePage(page);
-							callback({result: result});
-						}
+						let result = typeof fct == 'function' ? page.evaluate(fct, args) : page.evaluateJavaScript(fct);
+						PhantomScraper.closePage(page);
+						callback({result: result});
 					}
 					else {
 						PhantomScraper.closePage(page);
