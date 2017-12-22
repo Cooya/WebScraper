@@ -31,8 +31,8 @@ const getLinks = function() { // return all links from the requested page
 const scraperClient = ScraperClient.getInstance();
 
 scraperClient.request({
-    url: 'nicodev.fr',
-    function: getLinks // function injected in the page environment
+    url: 'cooya.fr',
+    fct: getLinks // function injected in the page environment
 })
 .then(function(result) {
     console.log(result); // returned value of the injected function
@@ -50,8 +50,8 @@ const { ScraperClient } = require('@coya/web-scraper');
 const scraperClient = ScraperClient.getInstance();
 
 scraperClient.request({
-    url: 'nicodev.fr',
-    scriptPath: __dirname + '/externalScript.js', // external script exporting the function to be injected
+    url: 'cooya.fr',
+    fct: __dirname + '/externalScript.js', // external script exporting the function to be injected
 })
 .then(function(result) {
     console.log(result); // returned value of the injected function
@@ -93,6 +93,8 @@ Terminate the PhantomJS web scraper process that will allow to end the current N
 Parameter | Type    | Description | Required
 --------  | ---     | --- | ---
 url  | string | target url | yes
-scriptPath | string | absolute path of the JS script to inject | optional
-function | string or function | if string, it will be the name of the function to call from the injected script ("scriptPath" must be specified too), if function, it will be a function injected into the page | optional
+fct | string | the script filename and function name (separated by the character "#") to inject into the page, the function name can be omitted if the script returns a function | yes
+fct | function | the function to inject into the page | yes
 args | object | object passed to the called function | optional
+referer | string | referer header for the request | optional
+debug | boolean | enable the debug mode (verbose) | optional
