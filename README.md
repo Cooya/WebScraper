@@ -37,7 +37,7 @@ const getLinks = function() { // return all links from the requested page
 
 scraper.request({
     url: 'cooya.fr',
-    function: getLinks // function injected in the page environment
+    fct: getLinks // function injected in the page environment
 })
 .then(function(result) {
     console.log(result); // returned value of the injected function
@@ -59,7 +59,7 @@ const scraper = ChromiumScraper.getInstance();
 
 scraper.request({
     url: 'cooya.fr',
-    scriptPath: __dirname + '/externalScript.js', // external script exporting the function to be injected
+    fct: __dirname + '/externalScript.js', // external script exporting the function to be injected
 })
 .then(function(result) {
     console.log(result); // returned value of the injected function
@@ -101,7 +101,8 @@ Terminate the PhantomJS web scraper process that will allow to end the current N
 Parameter | Type    | Description | Required
 --------  | ---     | --- | ---
 url  | string | target url | yes
-fct | function | JS function to inject | yes
+fct | function | JS function to inject into the page | yes
 fct | string | path to script path and function to inject separated by hash key (e.g. "path/to/script/script.js#functionToCall") | yes
 referer | string | referer header parameter set in each request | optional
 args | object | object passed to the injected function | optional
+debug | boolean | enable the debug mode (verbose) | optional
