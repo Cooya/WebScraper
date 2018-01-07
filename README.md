@@ -1,6 +1,8 @@
 # Web Scraper
 
-Web scraper based on PhantomJS, designed as a connection client/server between the PhantomJS web scraper server and a client acting like a driver and sending scraping HTTP requests to the server.
+Web scraper on top of PhantomJS or Chromium.  
+If you chose to use PhantomJS, the module is designed as a connection client/server between the PhantomJS web scraper server and a client acting like a driver and sending scraping HTTP requests to the server.  
+Chromium is different because it is driven directly from NodeJS.
 
 ## Installation
 ```
@@ -12,15 +14,20 @@ npm install @coya/web-scraper
 git clone https://github.com/Cooya/WebScraper
 cd WebScraper
 npm install // it will also install the development dependencies
-npm install phantomjs -g // PhantomJS needs to be installed globally
+npm install phantomjs -g // if you need PhantomJS, install it globally
 npm run build
 npm run example // run the example script in "examples" folder
 ```
 
 ## Usage examples
-The package allows to inject JS function (from the same file) :
+The package allows to inject JS function :
 ```javascript
-const { ScraperClient } = require('@coya/web-scraper');
+const { ChromiumScraper } = require('@coya/web-scraper');
+
+// if you want to use PhantomJS instead of Chromium
+// const { PhantomScraper } = require('@coya/web-scraper');
+
+const scraper = ChromiumScraper.getInstance();
 
 const getLinks = function() { // return all links from the requested page
     return $('a').map(function(i, elt) {
@@ -28,37 +35,38 @@ const getLinks = function() { // return all links from the requested page
     }).get();
 };
 
-const scraperClient = ScraperClient.getInstance();
-
-scraperClient.request({
-    url: 'nicodev.fr',
+scraper.request({
+    url: 'cooya.fr',
     function: getLinks // function injected in the page environment
 })
 .then(function(result) {
     console.log(result); // returned value of the injected function
-    scraperClient.closeScraper(); // end the client/server connection and kill the web scraper subprocess
+    scraper.close(); // end the client/server connection and kill the web scraper subprocess
 }, function(error) {
     console.error(error);
-    scraperClient.closeScraper();
+    scraper.close();
 });
 ```
 
 Or to inject JS function from an external script :
 ```javascript
-const { ScraperClient } = require('@coya/web-scraper');
+const { ChromiumScraper } = require('@coya/web-scraper');
 
-const scraperClient = ScraperClient.getInstance();
+// if you want to use PhantomJS instead of Chromium
+// const { PhantomScraper } = require('@coya/web-scraper');
 
-scraperClient.request({
-    url: 'nicodev.fr',
+const scraper = ChromiumScraper.getInstance();
+
+scraper.request({
+    url: 'cooya.fr',
     scriptPath: __dirname + '/externalScript.js', // external script exporting the function to be injected
 })
 .then(function(result) {
     console.log(result); // returned value of the injected function
-    scraperClient.closeScraper(); // end the client/server connection and kill the web scraper subprocess
+    scraper.close(); // end the client/server connection and kill the web scraper subprocess
 }, function(error) {
     console.error(error);
-    scraperClient.closeScraper();
+    scraper.close();
 });
 ```
 externalScript.js :
@@ -84,7 +92,7 @@ Parameter | Type    | Description | Default value
 --------  | ---     | --- | ---
 params  | object | see below for details about this | none
 
-### closeScraper()
+### close()
 
 Terminate the PhantomJS web scraper process that will allow to end the current NodeJS script properly.
 
@@ -93,6 +101,7 @@ Terminate the PhantomJS web scraper process that will allow to end the current N
 Parameter | Type    | Description | Required
 --------  | ---     | --- | ---
 url  | string | target url | yes
-scriptPath | string | absolute path of the JS script to inject | optional
-function | string or function | if string, it will be the name of the function to call from the injected script ("scriptPath" must be specified too), if function, it will be a function injected into the page | optional
-args | object | object passed to the called function | optional
+fct | function | JS function to inject | yes
+fct | string | path to script path and function to inject separated by hash key (e.g. "path/to/script/script.js#functionToCall") | yes
+referer | string | referer header parameter set in each request | optional
+args | object | object passed to the injected function | optional

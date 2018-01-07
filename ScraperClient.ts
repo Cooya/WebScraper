@@ -242,7 +242,7 @@ export class ScraperClient {
 		});
 	}
 
-	public closeScraper() {
+	public close() {
 		this.scraperProcess.removeAllListeners('exit'); // to avoid restarting the scraper
 		return this.sendExitRequest()
 		.then(() => {

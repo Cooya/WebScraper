@@ -18,8 +18,8 @@ scraper.request({
 })
 .then(function(result) {
 	console.log(result);
-	scraper.closeScraper();
+	scraper.close();
 }, function(error) {
 	console.error(error);
-	scraper.closeScraper();
+	scraper.close();
 });
