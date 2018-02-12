@@ -41,7 +41,7 @@ scraper.request({
 })
 .then(function(result) {
     console.log(result); // returned value of the injected function
-    scraper.close(); // end the client/server connection and kill the web scraper subprocess
+    scraper.close(); // close the headless browser
 }, function(error) {
     console.error(error);
     scraper.close();
@@ -63,7 +63,7 @@ scraper.request({
 })
 .then(function(result) {
     console.log(result); // returned value of the injected function
-    scraper.close(); // end the client/server connection and kill the web scraper subprocess
+    scraper.close(); // close the headless browser
 }, function(error) {
     console.error(error);
     scraper.close();
